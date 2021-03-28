@@ -7,3 +7,4 @@ class UnionRangeValidationWithTypeAlias extends RangeValidationBase {
         return this.RangeCheck(this.GetNumber(value));
     }
 }
+
