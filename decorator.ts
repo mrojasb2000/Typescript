@@ -19,6 +19,43 @@ class NoRoleCheck implements IDecoratorExample {
     }
 }
 
+class DecorateExampleMethodDecoration implements IDecoratorExample {
+    @Role("user")
+    AnyoneCanRun(args: string): void {
+       console.log(args);
+    }
+    //@Admin
+    @Role("admin")
+    AdminOnly(args: string): void {
+        console.log(args);
+    }
+}
+function Role(role : string) {
+    return function(target : any, propertyKey :  string | symbol, descriptor : PropertyDescriptor) {
+        let originalMethod = descriptor.value;
+        descriptor.value = function() {
+            if (IsInRole(role)) {
+                originalMethod.apply(this, arguments);
+                return;
+            }
+            console.log(`${currentUser.user} is not in the ${role} role`)
+        }
+        return descriptor;
+    }
+}
+
+function Admin(target: any, propertyKey :  string | symbol, descriptor : PropertyDescriptor) {
+    let originalMethod = descriptor.value;
+    descriptor.value = function() {
+        if (IsInRole(`admin`)) {
+            originalMethod.apply(this, arguments);
+            return;
+        }
+        console.log(`${currentUser.user} is not in the admin role`)
+    }
+    return descriptor;
+}
+
 function IsInRole(role: string) : boolean {
     return currentUser.roles.some(r => r.role === role);
 }
@@ -30,4 +67,5 @@ function TestDecoratorExample(decoratorMethod : IDecoratorExample) {
     decoratorMethod.AnyoneCanRun(`Running as user`);
     decoratorMethod.AdminOnly(`Running as admin`);       
 }
-TestDecoratorExample(new NoRoleCheck());
+//TestDecoratorExample(new NoRoleCheck());
+TestDecoratorExample(new DecorateExampleMethodDecoration());
